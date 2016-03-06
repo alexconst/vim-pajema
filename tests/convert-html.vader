@@ -1,4 +1,4 @@
-" Tests conversion from markdown to html
+# Tests conversion from markdown to html
 
 Given markdown;
 # chap
@@ -6,16 +6,20 @@ Given markdown;
 hello
 
 Execute (check html file is created):
+# vim-pajema needs a real file with known whereabouts to work
+# so we save and open it
   :w! /tmp/vim-pajema_input.md
   :edit /tmp/vim-pajema_input.md
+# convert to html
   normal ,h
-  ":execute '!echo "FILENAME: ' . expand('%:p') . '" > /tmp/vim-pajema_log.txt'
-  ":execute '!echo "LINES: ' . line('$') . '" >> /tmp/vim-pajema_log.txt'
+# open generated html and verify it
   :edit /tmp/vim-pajema_input.html
-  ":execute '!echo "FILENAME: ' . expand('%:p') . '" >> /tmp/vim-pajema_log.txt'
-  ":execute '!echo "LINES: ' . line('$') . '" >> /tmp/vim-pajema_log.txt'
   AssertEqual getline('1'), '<!DOCTYPE html>'
-  AssertEqual getline('23'), '<p>hello</p>'
+# navigate to first (and only) paragraph
+  /<p\>
+  AssertEqual getline('.'), '<p>hello</p>'
+# "delete" both files
   :1,$d
   :w! /tmp/vim-pajema_input.html
+  :w! /tmp/vim-pajema_input.md
 

@@ -21,14 +21,21 @@ Execute (check html file is created):
   execute ':edit ' . g:md_filename
 # convert to html
   normal ,h
+# close markdown file
+  :tabclose
 # open generated html and verify it
   execute ':edit ' . g:html_filename
   AssertEqual getline('1'), '<!DOCTYPE html>'
+# navigate to heading
+  /<h1\>
+  AssertEqual getline('.'), '<h1><span class="header-section-number">1</span> chap</h1>'
 # navigate to first (and only) paragraph
   /<p\>
   AssertEqual getline('.'), '<p>hello</p>'
 # "delete" both files
-  :1,$d
-  execute ':w! ' . g:md_filename
-  execute ':w! ' . g:html_filename
+  ":1,$d
+  "execute ':w! ' . g:md_filename
+  "execute ':w! ' . g:html_filename
+# close html file
+  :tabclose
 

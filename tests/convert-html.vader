@@ -1,0 +1,21 @@
+" Tests conversion from markdown to html
+
+Given markdown;
+# chap
+
+hello
+
+Execute (check html file is created):
+  :w! /tmp/vim-pajema_input.md
+  :edit /tmp/vim-pajema_input.md
+  normal ,h
+  ":execute '!echo "FILENAME: ' . expand('%:p') . '" > /tmp/vim-pajema_log.txt'
+  ":execute '!echo "LINES: ' . line('$') . '" >> /tmp/vim-pajema_log.txt'
+  :edit /tmp/vim-pajema_input.html
+  ":execute '!echo "FILENAME: ' . expand('%:p') . '" >> /tmp/vim-pajema_log.txt'
+  ":execute '!echo "LINES: ' . line('$') . '" >> /tmp/vim-pajema_log.txt'
+  AssertEqual getline('1'), '<!DOCTYPE html>'
+  AssertEqual getline('23'), '<p>hello</p>'
+  :1,$d
+  :w! /tmp/vim-pajema_input.html
+

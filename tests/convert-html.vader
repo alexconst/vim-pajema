@@ -1,25 +1,34 @@
 # Tests conversion from markdown to html
 
+Before:
+  let g:test_dir = '/tmp/vim-pajema/'
+  let g:md_filename = g:test_dir . '_drafts/input_file.md'
+  let g:html_filename = g:test_dir . '_drafts/input_file.html'
+  let g:jekyll_filename = g:test_dir . '_posts/xxxxxxxxxxxxxxxxx.markdown'
+  silent execute '!mkdir -p ' . g:test_dir . '{_drafts,_posts}'
+
+
+
 Given markdown;
 # chap
 
 hello
 
 Execute (check html file is created):
-# vim-pajema needs a real file with known whereabouts to work
+# vim-pajema needs a real file with known whereabouts to work,
 # so we save and open it
-  :w! /tmp/vim-pajema_input.md
-  :edit /tmp/vim-pajema_input.md
+  execute ':w! ' . g:md_filename
+  execute ':edit ' . g:md_filename
 # convert to html
   normal ,h
 # open generated html and verify it
-  :edit /tmp/vim-pajema_input.html
+  execute ':edit ' . g:html_filename
   AssertEqual getline('1'), '<!DOCTYPE html>'
 # navigate to first (and only) paragraph
   /<p\>
   AssertEqual getline('.'), '<p>hello</p>'
 # "delete" both files
   :1,$d
-  :w! /tmp/vim-pajema_input.html
-  :w! /tmp/vim-pajema_input.md
+  execute ':w! ' . g:md_filename
+  execute ':w! ' . g:html_filename
 

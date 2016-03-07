@@ -1,4 +1,8 @@
-# Tests conversion from markdown to html
+# Tests:
+#   - conversion from pandoc markdown to html
+#   - browser preview of html
+#   - conversion from pandoc markdown to jekyll markdown
+
 
 Before:
   let g:test_dir = '/tmp/vim-pajema/'
@@ -6,7 +10,8 @@ Before:
   let g:html_filename = g:test_dir . '_drafts/input_file.html'
   let g:md_filename_bro = g:test_dir . '_drafts/input_file_bro.md'
   let g:jekyll_filename = g:test_dir . '_posts/2016-01-11-input-file-bro.markdown'
-  let g:log_file = '/tmp/vader.txt'
+  let g:log_file = g:test_dir . 'vader.txt'
+# Note that 'input_file_bro.md' is referred as content in a Given markdown file
 
 
 
@@ -15,16 +20,34 @@ Before:
 # we can't use Vader's After directive because that is done after each test, but
 # we need to maintain a state since we'll work with multiple files
 ##########################################
+Given markdown;
+---
+layout: post
+title:  'Vagrant – automating environment deployment'
+author: 'Alexandre Constantino'
+date:   2016-01-28
+categories: devops
+tags:       tutorial vagrant
+---
+
+# About
+
+markdown brother in arms file
+
+This is a guide on Vagrant which covers most of what there is to known about it. If you've found other resources to be confusing, not going through all the steps, or leaving out information; then you may find this tutorial helpful.
+In any case, if you just need a cheat sheet then jump into the [About](#about).
+
 Execute (prepare test environment):
 # create work directories
   silent execute '!mkdir -p ' . g:test_dir . '{_drafts,_posts}'
+# save the support file
+  execute ':w! ' . g:md_filename_bro
 # clear file contents
   execute ':tabe ' . g:log_file
   :1,$d
   :w
   execute ':w! ' . g:md_filename
   execute ':w! ' . g:html_filename
-  execute ':w! ' . g:md_filename_bro
   execute ':w! ' . g:jekyll_filename
   :tabclose
 
@@ -61,6 +84,7 @@ Execute (check html file is created):
 
 
 
+
 ##########################################
 # check browser opens generated html file
 ##########################################
@@ -89,5 +113,54 @@ Execute (check browser opens generated html file):
   execute ':tabe ' . g:log_file
   AssertEqual getline('1'), '"file:///tmp/vim-pajema/_drafts/input_file.html"'
   :tabclose
+
+
+
+
+##########################################
+# check conversion from pandoc to jekyll
+##########################################
+Given markdown;
+---
+layout: post
+title:  'Packer – automating virtual machine image creation'
+author: 'Alexandre Constantino'
+date:   2016-01-11
+categories: devops
+tags:       tutorial packer
+---
+
+# What is Packer
+
+Packer is a tool for automating the creation of identical virtual machine images for multiple platforms from a single source configuration. Allowing for the image creation process to execute in parallel for multiple machine images.
+Supported platforms include: AWS EC2 AMI, DigitalOcean, Docker, Google Compute Engine, OpenStack, Parallels, QEMU, VirtualBox, VMware.
+And the provisioning (ie: installation and configuration of software into the machine image) can be done using one or more of the supported configuration management tools: shell scripts, Ansible, Chef, Puppet, Salt.
+After an image is created it's possible to run a post-processor to better suite the desired intent, for example vSphere (to upload an image to an endpoint) or [Vagrant](input_file_bro.md) (to convert the image into a valid Vagrant box).
+The advantage of using Packer is that it allows creating the same image for multiple platforms and also makes possible for problem resolution to be done at image creation. Another benefit is that after an image is created you can spin a fully configured machine in just a couple of minutes.
+The outputs produced by Packer (eg: AWS AMI IDs; VMware image files) are called artifacts.
+
+Execute (check conversion from pandoc to jekyll):
+# save the given markdown file
+  execute ':w! ' . g:md_filename
+# open md file
+  execute ':edit ' . g:md_filename
+# convert to jekyll
+  normal ,j
+# check that the generated file has the correct name
+  " TODO: fix some strage bug going on here, it generates the jekyll for the aux file as well
+  " and keeps it open, such that the current tab name will not match
+  "AssertEqual expand('%:p'), g:jekyll_filename
+# check paragraph with trailing spaces
+  /\<parallel\>
+  AssertEqual getline('.'), 'parallel for multiple machine images.  '
+# check jekyll reference
+  /\<endpoint\>
+  AssertEqual getline('.'), 'to an endpoint) or [Vagrant]({% post_url 2016-01-28-input-file-bro %}) (to convert the image'
+
+
+
+
+
+
 
 

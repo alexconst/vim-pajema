@@ -4,6 +4,7 @@
 #   - conversion from pandoc markdown to jekyll markdown
 
 
+# Note that 'input_file_bro.md' is referred as content in a Given markdown file
 Before:
   let g:test_dir = '/tmp/vim-pajema/'
   let g:md_filename = g:test_dir . '_drafts/input_file.md'
@@ -11,7 +12,7 @@ Before:
   let g:md_filename_bro = g:test_dir . '_drafts/input_file_bro.md'
   let g:jekyll_filename = g:test_dir . '_posts/2016-01-11-input-file.markdown'
   let g:log_file = g:test_dir . 'vader.txt'
-# Note that 'input_file_bro.md' is referred as content in a Given markdown file
+  :silent! 4,10bwipeout
 
 
 
@@ -50,7 +51,6 @@ Execute (prepare test environment):
   execute ':w! ' . g:md_filename
   execute ':w! ' . g:html_filename
   execute ':w! ' . g:jekyll_filename
-  :bdelete
 
 
 
@@ -70,8 +70,6 @@ Execute (check html file is created):
   execute ':edit ' . g:md_filename
 # convert to html
   normal ,h
-# close markdown file
-  :bdelete
 # open generated html and verify it
   execute ':edit ' . g:html_filename
   AssertEqual getline('1'), '<!DOCTYPE html>'
@@ -81,8 +79,6 @@ Execute (check html file is created):
 # navigate to first (and only) paragraph
   /<p\>
   AssertEqual getline('.'), '<p>hello</p>'
-# close html file
-  :bdelete
 
 
 
@@ -111,12 +107,9 @@ Execute (check browser opens generated html file):
   let cmd = cmd . "; cat \"$firefox_session\" | jq '.\"windows\"[][\"tabs\"][][\"entries\"][][\"url\"]' | grep "
   let cmd = cmd . g:html_filename[:-1] . ' > ' . g:log_file
   silent execute '!' . cmd
-# close md file
-  :bdelete
 # open file and assert
   execute ':tabe ' . g:log_file
   AssertEqual getline('1'), '"file:///tmp/vim-pajema/_drafts/input_file.html"'
-  :bdelete
 
 
 
@@ -144,7 +137,6 @@ The advantage of using Packer is that it allows creating the same image for mult
 The outputs produced by Packer (eg: AWS AMI IDs; VMware image files) are called artifacts.
 
 Execute (check conversion from pandoc to jekyll):
-  :4,10bwipeout
 # save the given markdown file
   execute ':w! ' . g:md_filename
 # open md file

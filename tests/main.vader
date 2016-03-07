@@ -9,9 +9,10 @@ Before:
   let g:md_filename = g:test_dir . '_drafts/input_file.md'
   let g:html_filename = g:test_dir . '_drafts/input_file.html'
   let g:md_filename_bro = g:test_dir . '_drafts/input_file_bro.md'
-  let g:jekyll_filename = g:test_dir . '_posts/2016-01-11-input-file-bro.markdown'
+  let g:jekyll_filename = g:test_dir . '_posts/2016-01-11-input-file.markdown'
   let g:log_file = g:test_dir . 'vader.txt'
 # Note that 'input_file_bro.md' is referred as content in a Given markdown file
+
 
 
 
@@ -49,7 +50,8 @@ Execute (prepare test environment):
   execute ':w! ' . g:md_filename
   execute ':w! ' . g:html_filename
   execute ':w! ' . g:jekyll_filename
-  :tabclose
+  :bdelete
+
 
 
 
@@ -69,7 +71,7 @@ Execute (check html file is created):
 # convert to html
   normal ,h
 # close markdown file
-  :tabclose
+  :bdelete
 # open generated html and verify it
   execute ':edit ' . g:html_filename
   AssertEqual getline('1'), '<!DOCTYPE html>'
@@ -80,7 +82,7 @@ Execute (check html file is created):
   /<p\>
   AssertEqual getline('.'), '<p>hello</p>'
 # close html file
-  :tabclose
+  :bdelete
 
 
 
@@ -109,10 +111,12 @@ Execute (check browser opens generated html file):
   let cmd = cmd . "; cat \"$firefox_session\" | jq '.\"windows\"[][\"tabs\"][][\"entries\"][][\"url\"]' | grep "
   let cmd = cmd . g:html_filename[:-1] . ' > ' . g:log_file
   silent execute '!' . cmd
+# close md file
+  :bdelete
 # open file and assert
   execute ':tabe ' . g:log_file
   AssertEqual getline('1'), '"file:///tmp/vim-pajema/_drafts/input_file.html"'
-  :tabclose
+  :bdelete
 
 
 
@@ -140,6 +144,7 @@ The advantage of using Packer is that it allows creating the same image for mult
 The outputs produced by Packer (eg: AWS AMI IDs; VMware image files) are called artifacts.
 
 Execute (check conversion from pandoc to jekyll):
+  :4,10bwipeout
 # save the given markdown file
   execute ':w! ' . g:md_filename
 # open md file
@@ -147,19 +152,13 @@ Execute (check conversion from pandoc to jekyll):
 # convert to jekyll
   normal ,j
 # check that the generated file has the correct name
-  " TODO: fix some strage bug going on here, it generates the jekyll for the aux file as well
-  " and keeps it open, such that the current tab name will not match
-  "AssertEqual expand('%:p'), g:jekyll_filename
+  AssertEqual expand('%:p'), g:jekyll_filename
 # check paragraph with trailing spaces
   /\<parallel\>
   AssertEqual getline('.'), 'parallel for multiple machine images.  '
 # check jekyll reference
   /\<endpoint\>
   AssertEqual getline('.'), 'to an endpoint) or [Vagrant]({% post_url 2016-01-28-input-file-bro %}) (to convert the image'
-
-
-
-
 
 
 

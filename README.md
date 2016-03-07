@@ -10,7 +10,8 @@ vim-pajema aims to make life easier for those using the above mentioned tools.
 **Preview**
 Type `,h` and the file gets converted to html.
 Type `,p` and the html opens in your browser.
-Enable the option and everytime you save the markdown file a new html file is generated. Tile vim and firefox side by side and you can now live edit your file.
+Enable the option and everytime you save the markdown file a new html file is generated.
+Tile vim and firefox side by side and you can now live edit your markdown file.
 
 **Conversion**
 Type `,j` and the sensible Pandoc markdown gets converted to a Jekyll compatible markdown.
@@ -37,7 +38,14 @@ Anyway, fast forward and this script just kept on growing and growing.
 
 The initial version of this script was based on [this awesome gist](https://gist.github.com/natesilva/960015) (maybe it even fits your bill better than this one). But as time went by all traces of it faded, except for the utf handling snippet.
 
-Also thank you John MacFarlane for Pandoc. I just love Pandoc. It really is a life saver when it comes to handling documentation.
+Also thank you John MacFarlane and contributors for Pandoc. I just love Pandoc. It really is a life saver when it comes to handling documentation.
 
-And the people working on vim-markdown as well. They make it possible to use markdown in vim.
+And the people working on vim-markdown as well. For making markdown editing a great experience.
+
+
+
+
+# TODO
+
+spring cleaning
 

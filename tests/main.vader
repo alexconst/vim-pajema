@@ -12,7 +12,7 @@ Before:
   let g:md_filename_bro = g:test_dir . '_drafts/input_file_bro.md'
   let g:jekyll_filename = g:test_dir . '_posts/2016-01-11-input-file.markdown'
   let g:log_file = g:test_dir . 'vader.txt'
-  :silent! 4,10bwipeout
+  :silent! 4,400bwipeout
 
 
 
@@ -151,6 +151,40 @@ Execute (check conversion from pandoc to jekyll):
 # check jekyll reference
   /\<endpoint\>
   AssertEqual getline('.'), 'to an endpoint) or [Vagrant]({% post_url 2016-01-28-input-file-bro %}) (to convert the image'
+
+
+
+
+##########################################
+# check conversion from pandoc to jekyll using Kramdown
+##########################################
+Given markdown;
+---
+layout: post
+title:  'some title'
+author: 'someone'
+date:   2016-01-11
+---
+
+# chap
+
+Vimscript: the final frontier. These are the commits from programmer Foo
+
+
+Execute (check conversion from pandoc to jekyll with kramdown):
+# enable kramdown toc include line
+  let g:vim_pajemas_kramdown_toc=1
+# save the given markdown file
+  execute ':w! ' . g:md_filename
+# open md file
+  execute ':edit ' . g:md_filename
+# convert to jekyll
+  normal ,j
+# check that the generated file has the correct name
+  AssertEqual expand('%:p'), g:jekyll_filename
+# check include toc line
+  /\<include\>
+  AssertEqual getline('.'), '{% include toc.md %}'
 
 
 

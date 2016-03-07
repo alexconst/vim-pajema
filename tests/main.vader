@@ -170,6 +170,10 @@ date:   2016-01-11
 
 Vimscript: the final frontier. These are the commits from programmer Foo
 
+Naked links (test for workaround on jekyll 3 bugs):
+<https://github.com/github/pages-gem/issues/231>
+<https://github.com/jekyll/jekyll/issues/4627>
+
 
 Execute (check conversion from pandoc to jekyll with kramdown):
 # enable kramdown toc include line
@@ -185,6 +189,12 @@ Execute (check conversion from pandoc to jekyll with kramdown):
 # check include toc line
   /\<include\>
   AssertEqual getline('.'), '{% include toc.md %}'
+# check naked link with newline
+  /231
+  AssertEqual getline('.'), '[https://github.com/github/pages-gem/issues/231](https://github.com/github/pages-gem/issues/231)  '
+# check naked link without newline
+  /4627
+  AssertEqual getline('.'), '[https://github.com/jekyll/jekyll/issues/4627](https://github.com/jekyll/jekyll/issues/4627)'
 
 
 

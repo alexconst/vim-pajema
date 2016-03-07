@@ -5,9 +5,29 @@ Before:
   let g:md_filename = g:test_dir . '_drafts/input_file.md'
   let g:html_filename = g:test_dir . '_drafts/input_file.html'
   let g:md_filename_bro = g:test_dir . '_drafts/input_file_bro.md'
-  let g:jekyll_filename = g:test_dir . '_posts/xxxxxxxxxxxxxxxxx.markdown'
+  let g:jekyll_filename = g:test_dir . '_posts/2016-01-11-input-file-bro.markdown'
   let g:log_file = '/tmp/vader.txt'
+
+
+
+##########################################
+# clear all content from the files we'll use
+# we can't use Vader's After directive because that is done after each test, but
+# we need to maintain a state since we'll work with multiple files
+##########################################
+Execute (prepare test environment):
+# create work directories
   silent execute '!mkdir -p ' . g:test_dir . '{_drafts,_posts}'
+# clear file contents
+  execute ':tabe ' . g:log_file
+  :1,$d
+  :w
+  execute ':w! ' . g:md_filename
+  execute ':w! ' . g:html_filename
+  execute ':w! ' . g:md_filename_bro
+  execute ':w! ' . g:jekyll_filename
+  :tabclose
+
 
 
 ##########################################
@@ -36,10 +56,6 @@ Execute (check html file is created):
 # navigate to first (and only) paragraph
   /<p\>
   AssertEqual getline('.'), '<p>hello</p>'
-# "delete" both files
-  ":1,$d
-  "execute ':w! ' . g:md_filename
-  "execute ':w! ' . g:html_filename
 # close html file
   :tabclose
 
@@ -54,11 +70,6 @@ Given markdown;
 check that generated html file gets open in browser
 
 Execute (check browser opens generated html file):
-# clear the log file just to be sure
-  execute ':tabe ' . g:log_file
-  :1,$d
-  :w
-  :tabclose
 # save the given markdown file
   execute ':w! ' . g:md_filename
 # open md file

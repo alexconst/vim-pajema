@@ -176,7 +176,8 @@ Naked links (test for workaround on jekyll 3 bugs):
 
 
 Execute (check conversion from pandoc to jekyll with kramdown):
-# enable kramdown toc include line
+# enable kramdown and toc include line
+  let g:vim_pajemas_kramdown=1
   let g:vim_pajemas_kramdown_toc=1
 # save the given markdown file
   execute ':w! ' . g:md_filename

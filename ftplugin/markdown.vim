@@ -42,6 +42,7 @@ function!ConvertMarkdownToJekyll()
 
     silent update
     let input_name = expand('%:p')
+    " use date tag to determine jekyll post filename
     if len(matched) > 0
         let this_file = expand('%:t:r')
         let this_file = substitute(this_file, '_', '-', 'g')   " not mandatory
@@ -101,10 +102,15 @@ function!ConvertMarkdownToJekyll()
 
     echo 'Jekyll compatible markdown file created: ' . output_name
     "silent exec ':tabedit ' . output_name                  " doesn't work, explained here: http://stackoverflow.com/questions/22633115/why-do-i-get-e127-from-this-vimscript
+
+    " save names that will be used in post processing step
     let g:vim_pajemas_drafts_file = output_name
     let g:vim_pajemas_posts_file = posts_output_name
 
 endfunction
+
+
+
 
 function!MyLoggerInit(log_file)
     echom 'Initializing log file: ' . a:log_file
@@ -122,6 +128,10 @@ function!MyLogger(log_file, line_num, ...)
     silent execute '! echo "' . text . '" >> ' . a:log_file
     redraw!
 endfunction
+
+
+
+
 
 function!JekyllFilePostProc()
     let log_file = 'log.txt'
@@ -198,6 +208,24 @@ function!JekyllFilePostProc()
             call setline('.', head . tail)
         endif
     endwhile
+
+    " implement workaround to jekyll 3 bug on naked links which basically means
+    " converting this:  <https://github.com/alexconst>
+    " into:             [https://github.com/alexconst](https://github.com/alexconst)
+    if g:vim_pajemas_kramdown == 1
+        normal gg
+        let expr_big = '^<[a-z]\+://[^>]\+>\(  \)\?$' " this expr finds naked links
+        let flags = 'W'
+        let b:lnum = 1
+        while b:lnum > 0
+            let [b:lnum, b:cnum] = searchpos(expr_big, flags)
+            "echom 'found link at line ' . string(b:lnum)
+            "call MyLogger(log_file, b:lnum, getline(b:lnum))
+            let b:lineraw = getline(b:lnum)
+            let b:newline = substitute(b:lineraw,   '^<\(.*\)>\(.*\)$',   '[\1](\1)\2', 'g')
+            call setline(b:lnum, b:newline)
+        endwhile
+    endif 
 
     " fix pandoc quote character and escape jekyll liquid tags
     let b:lnum = 1
@@ -429,6 +457,7 @@ endfunction
 
 
 
+let g:vim_pajemas_kramdown=1
 let g:vim_pajemas_kramdown_toc=1
 
 " for jekyll compatibility reasons we only create html files for .md files

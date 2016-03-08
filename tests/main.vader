@@ -174,8 +174,10 @@ Naked links (test for workaround on jekyll 3 bugs):
 <https://github.com/github/pages-gem/issues/231>
 <https://github.com/jekyll/jekyll/issues/4627>
 
+  http://debian.org
 
-Execute (check conversion from pandoc to jekyll with kramdown):
+
+Execute (check conversion from pandoc to jekyll 3 with kramdown):
 # enable kramdown and toc include line
   let g:vim_pajemas_kramdown=1
   let g:vim_pajemas_kramdown_toc=1
@@ -196,6 +198,9 @@ Execute (check conversion from pandoc to jekyll with kramdown):
 # check naked link without newline
   /4627
   AssertEqual getline('.'), '[https://github.com/jekyll/jekyll/issues/4627](https://github.com/jekyll/jekyll/issues/4627)'
+# check naked link without braces and with leading whitespace
+  /debian
+  AssertEqual getline('.'), '[http://debian.org](http://debian.org)'
 
 
 

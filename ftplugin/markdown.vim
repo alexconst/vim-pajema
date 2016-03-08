@@ -214,7 +214,7 @@ function!JekyllFilePostProc()
     " into:             [https://github.com/alexconst](https://github.com/alexconst)
     if g:vim_pajemas_kramdown == 1
         normal gg
-        let expr_big = '^<[a-z]\+://[^>]\+>\(  \)\?$' " this expr finds naked links
+        let expr_big = '\s*<[a-z]\+://[^>]\+>\(  \)\?$' " this expr finds naked links
         let flags = 'W'
         let b:lnum = 1
         while b:lnum > 0
@@ -222,7 +222,7 @@ function!JekyllFilePostProc()
             "echom 'found link at line ' . string(b:lnum)
             "call MyLogger(log_file, b:lnum, getline(b:lnum))
             let b:lineraw = getline(b:lnum)
-            let b:newline = substitute(b:lineraw,   '^<\(.*\)>\(.*\)$',   '[\1](\1)\2', 'g')
+            let b:newline = substitute(b:lineraw,   '\(.*\)<\(.*\)>\(.*\)$',   '\1[\2](\2)\3', 'g')
             call setline(b:lnum, b:newline)
         endwhile
     endif 

@@ -31,7 +31,8 @@ function!ConvertMarkdownToJekyll()
 
     " search for a yaml frontmatter date tag
     let matched = ''
-    let lines = getline(1, 10)
+    " TODO: fix this limit
+    let lines = getline(1, 30)
     for line in lines
         "for line in readfile(b:url, '', 8)
         if line =~ '^date: '
@@ -183,7 +184,7 @@ function!JekyllFilePostProc()
             let matched = ''
             let b:abs_url = expand('%:p:h') . '/' . b:url
             if filereadable(b:abs_url)
-                for line in readfile(b:abs_url, '', 10)
+                for line in readfile(b:abs_url, '', 10) " TODO: fix this limit
                     if line =~ '^date: '
                         "echo line
                         let matched = matchstr(line, '[0-9\-]\+')
@@ -234,8 +235,8 @@ function!JekyllFilePostProc()
         let line = getline(b:lnum)
         let line = substitute(line, '’\|‘', "'", 'g')
         let line = substitute(line, '“\|”', '"', 'g')
-        let line = substitute(line, '{{', '{\% raw \%}{{', 'g')
-        let line = substitute(line, '}}', '}}{\% endraw \%}', 'g')
+        " this replace strategy handles tag nesting (which sometimes happens with Ansible
+        let line = substitute(line, '{{\(.*\)}}', '{\% raw \%}{{\1}}{\% endraw \%}', '')
         call setline(b:lnum, line)
         let b:lnum = b:lnum + 1
     endwhile
@@ -256,20 +257,48 @@ function!JekyllFilePostProc()
             endif
             let head = substitute(line, '\([a-zA-Z]\+\):\s*.*', '\1', 'g')
             let tail = substitute(line, '[a-zA-Z]\+\(:\s*.*\)', '\1', 'g')
+            if tail =~ '^:\s*|'
+                while (1)
+                    let b:lnum = b:lnum + 1
+                    let line = getline(b:lnum)
+                    " add substring separator (it is not a real <CR>)
+                    let tail = tail . "\n" . line
+                    if getline(b:lnum + 1) =~ '^[a-zA-Z]\+:'
+                        break
+                    endif
+                endwhile
+            endif
             let yaml[head] = tail
         endif
     endwhile
     "echom string(yaml)
     " fix pandoc yaml frontmatter element sorting
-    let order = ['layout', 'title', 'date', 'categories', 'tags']
+    let order = ['layout', 'title', 'description', 'date', 'categories', 'tags']
     let b:lnum = 2
     while (len(order) > 0)
         let key = remove(order, 0)
         if has_key(yaml, key)
             let val = remove(yaml, key)
-            let newline = key . val
-            call setline(b:lnum, newline)
-            let b:lnum = b:lnum + 1
+            " yaml multiline case
+            if val =~ '^:\s*|'
+                " split single line into elements at '\n' substring pattern
+                let lines = split(val, "\n")
+                " write first element, which include element name (eg: description)
+                let newline = key . lines[0]
+                call setline(b:lnum, newline)
+                let b:lnum = b:lnum + 1
+                " write remaining lines
+                let i=1
+                while (i < len(lines))
+                    call setline(b:lnum, lines[i])
+                    let b:lnum = b:lnum + 1
+                    let i = i+1
+                endwhile
+            else
+                let newline = key . val
+                call setline(b:lnum, newline)
+                let b:lnum = b:lnum + 1
+            endif
         endif 
     endwhile
     while (len(yaml) > 0)

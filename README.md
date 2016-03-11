@@ -47,5 +47,9 @@ And the people working on vim-markdown as well. For making markdown editing a gr
 
 # TODO
 
-spring cleaning
+- spring cleaning
+- add configuration options
+- add information on https://github.com/jgm/pandocfilters (probably most if not all could have been done using filters)
+
+
 

@@ -229,14 +229,28 @@ function!JekyllFilePostProc()
     endif 
 
     " fix pandoc quote character and escape jekyll liquid tags
+    let l:fenced_block = 0
     let b:lnum = 1
     while(b:lnum <= line('$'))
-        "echom line
         let line = getline(b:lnum)
+        " track code blocks
+        if line =~ '````*' || line =~ '\~\~\~\~*'
+            if l:fenced_block == 0
+                let l:fenced_block = 1
+            elseif l:fenced_block == 1
+                let l:fenced_block = 0
+            endif
+        end
+        " get rid of these 'typographically correct' but IRL annoying incompatible chars
         let line = substitute(line, '’\|‘', "'", 'g')
         let line = substitute(line, '“\|”', '"', 'g')
-        " this replace strategy handles tag nesting (which sometimes happens with Ansible
+        " escape liquid tags inside code blocks (the ones outside code blocks are jekyll related)
+        if l:fenced_block == 1
+            let line = substitute(line, '{%\(.*\)%}', '{\% raw \%}{\%\1\%}{\% endraw \%}', '')
+        endif
+        " this greedy replace strategy handles tag nesting (which sometimes happens with Ansible
         let line = substitute(line, '{{\(.*\)}}', '{\% raw \%}{{\1}}{\% endraw \%}', '')
+
         call setline(b:lnum, line)
         let b:lnum = b:lnum + 1
     endwhile

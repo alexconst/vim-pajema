@@ -10,6 +10,8 @@ vim-pajema aims to make life easier for those using the above mentioned tools. B
 
 # Features
 
+With `,` being the leader key:
+
 **Preview**
 Type `,h` and the file gets converted to html.
 Type `,p` and the html opens in your browser.

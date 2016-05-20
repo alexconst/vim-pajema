@@ -2,32 +2,10 @@
 
 
 function!ConvertMarkdownToJekyll()
-    " **************************************************************
-    " Configurable settings
 
     " Pandoc command for converting the markdown file to a flavor compatible
     " with github/jekyll.
     let JEKYLL_MARKDOWN_COMMAND = 'pandoc -S -f markdown_github+footnotes+pandoc_title_block+yaml_metadata_block -t markdown_github+footnotes+fenced_code_blocks+backtick_code_blocks-hard_line_breaks+yaml_metadata_block  --atx-headers -s '
-    " Hacks needed since Pandoc wasn't enough to make a clean Jekyll ready 
-    " markdown file.
-    " 1) replace curly/typographic single and double quotes with plain ones
-    " 2) strip the space between in bold text (**bold text: **) which is
-    " required by pandoc
-    " 3) add jekyll front matter to the markdown file
-    "let JEKYLL_POSTPROC_COMMAND = " sed -i -e 's/’\\|‘/\\x27/g ; s/“\\|”/\\x22/g'  -e  's|\\*\\*\\(.*\\): \\*\\*|\\*\\*\\1:\\*\\*|g'  -e  '1s|^|---\\nlayout: post\\ntitle:  \\\"TITLE\\\"\\ndate:   2020-01-01 01:02:03\\ncategories: blog\\ntags:       writing\\n\\n---\\n\\n\\n|' "
-    " 3) and 4) tweak the yaml frontmatter for jekyll
-    "let JEKYLL_POSTPROC_COMMAND = " sed -i -e 's/’\\|‘/\\x27/g ; s/“\\|”/\\x22/g'      -e '1,10{s|\\.\\.\\.|---|g;}'  "
-    " -e  '1s|---|---\\nlayout:  post|' -e '1,10{s|\\.\\.\\.|categories: blog\\ntags:       writing\\n---|g; }'      " this works, but YAGNI since yaml is preserved, so you can keep it in original .md
-    " Escape liquid template tags,
-    " http://stackoverflow.com/questions/3426182/how-to-escape-liquid-template-tags
-    "let JEKYLL_ESCAPE_TAGS = " sed -i 's|{{|{\\% raw \\%}{{|g ; s|}}|}}{\\% endraw \\%}|g' "
-    " NOTE: we actually have to use sed here, because we can't open it in a
-    " buffer whose filetype maches the function being executed.
-
-    "let VIMMARKDOWN_AND_PANDOC_FIX = " sed -i -e '1,20{s|\\.\\.\\.|---|g;}'  "
-
-    " End of configurable settings
-    " **************************************************************
 
     " search for a yaml frontmatter date tag
     let matched = ''
@@ -79,15 +57,6 @@ function!ConvertMarkdownToJekyll()
     let md_command = '!' . JEKYLL_MARKDOWN_COMMAND . ' "' . expand('%:p') . '" -o "' . output_name . '"'
     "echom md_command
     silent exec md_command
-    "let md_command = '!'  . JEKYLL_POSTPROC_COMMAND . ' "' . output_name . '"'
-    ""echom md_command
-    "silent exec md_command
-    "let md_command = '!'  . JEKYLL_ESCAPE_TAGS . ' "' . output_name . '"'
-    ""echom md_command
-    "silent exec md_command
-    "let md_command = '!'  . VIMMARKDOWN_AND_PANDOC_FIX . ' "' . output_name . '"'
-    ""echom md_command
-    "silent exec md_command
 
     " If we changed the encoding, change it back.
     if original_encoding != 'utf-8' || original_bomb == 1
@@ -226,7 +195,7 @@ function!JekyllFilePostProc()
             let b:newline = substitute(b:lineraw,   '\(.*\)<\(.*\)>\(.*\)$',   '\1[\2](\2)\3', 'g')
             call setline(b:lnum, b:newline)
         endwhile
-    endif 
+    endif
 
     " fix pandoc quote character and escape jekyll liquid tags
     let l:fenced_block = 0
@@ -313,7 +282,7 @@ function!JekyllFilePostProc()
                 call setline(b:lnum, newline)
                 let b:lnum = b:lnum + 1
             endif
-        endif 
+        endif
     endwhile
     while (len(yaml) > 0)
         let key = keys(yaml)[0]
@@ -378,22 +347,13 @@ endfunction
 
 
 function!ProcessMarkdownToHtml()
-    " **************************************************************
-    " Configurable settings
 
-    "let MARKDOWN_COMMAND = 'markdown'
     "let MARKDOWN_COMMAND = 'pandoc -S -f markdown_github+footnotes -t html5 --section-divs --html-q-tags -s --toc --toc-depth=6 --number-sections -H /opt/share/doc/github-pandoc_html.css'
     let MARKDOWN_COMMAND = 'pandoc -S -f markdown_github+footnotes+pandoc_title_block+yaml_metadata_block+tex_math_dollars -t html5 --section-divs --html-q-tags -s --toc --toc-depth=6 --number-sections -c /opt/share/doc/normalize.css -c /opt/share/doc/pandoc-github.css --latexmathml=/opt/share/doc/LaTeXMathMLPandoc.js'
     " --latexmathml=/opt/share/doc/LaTeXMathMLPandoc.js
     " --mathjax
     " use -autolink_bare_uris on the input format to fix the bold-text-to-links
 
-    " delete these 2 lines???
-    "let JEKYLL_MARKDOWN_COMMAND = 'pandoc -S -f markdown_github+footnotes+pandoc_title_block -t markdown_github+fenced_code_blocks+backtick_code_blocks-hard_line_breaks  --atx-headers '
-    "let JEKYLL_POSTPROC_COMMAND = " sed -i -e 's/’\|‘/\x27/g ; s/“\|”/\x22/g'  -e  's#\*\*\(.*\): \*\*#\*\*\1:\*\*#g'  -e  '1s#^#---\nlayout: post\ntitle:  \"TITLE\"\ndate:   2020-01-01 01:02:03\ncategories: blog\ntags:       writing\n---\n\n\n#'"     " note: this one is certainly broken since wildcards are not being properly escaped
-
-    " End of configurable settings
-    " **************************************************************
 
     silent update
     "let output_name = tempname() . '.html'
@@ -411,35 +371,11 @@ function!ProcessMarkdownToHtml()
         silent update
     endif
 
-    "" Write the HTML header. Do a CSS reset, followed by setting up
-    "" some basic styles from YUI, so the output looks nice.
-    "let file_header = ['<html>', '<head>',
-    "    \ '<meta http-equiv="Content-Type" content="text/html; charset=utf-8">',
-    "    \ '<title>Markdown Preview</title>',
-    "    \ '<link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/3.3.0/build/cssreset/reset-min.css">',
-    "    \ '<link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/3.3.0/build/cssbase/base-min.css">',
-    "    \ '<link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/3.3.0/build/cssfonts/fonts-min.css">',
-    "    \ '<style>body{padding:20px;}div#container{background-color:#F2F2F2;padding:0 20px;margin:0px;border:solid #D0D0D0 1px;}</style>',
-    "    \ '</head>', '<body>', '<div id="container">']
-    "call writefile(file_header, output_name)
 
-
-    "let md_command = '!' . MARKDOWN_COMMAND . ' "' . expand('%:p') . '" >> "' .
-    "    \ output_name . '"'
     let md_command = '!' . MARKDOWN_COMMAND . ' "' . expand('%:p') . '" -o "' . output_name . '"'
     silent exec md_command
-    "let md_command = '!'  . FIX_PANDOC . ' "' . output_name . '"'
 
 
-    "if has('win32')
-    "    let footer_name = tempname()
-    "    call writefile(['</div></body></html>'], footer_name)
-    "    silent exec '!type "' . footer_name . '" >> "' . output_name . '"'
-    "    exec delete(footer_name)
-    "else
-    "    silent exec '!echo "</div></body></html>" >> "' .
-    "        \ output_name . '"'
-    "endif
 
     " If we changed the encoding, change it back.
     if original_encoding != 'utf-8' || original_bomb == 1
@@ -455,19 +391,9 @@ endfunction
 
 
 function!PreviewMarkdownInBrowser()
-    " **************************************************************
-    " Configurable settings
 
-    "if has('win32')
-    "    " note important extra pair of double-quotes
-    "    let BROWSER_COMMAND = 'cmd.exe /c start ""'
-    "else
-        "let BROWSER_COMMAND = '/usr/bin/chromium --temp-profile --incognito --bwsi --disable-sync-preferences --disable-extensions --disable-plugins --disk-cache-dir=/dev/shm '
-    "endif
     let BROWSER_COMMAND = '/opt/bin/firefox'
 
-    " End of configurable settings
-    " **************************************************************
 
     " jekyll compatibility
     if expand('%:e') == 'markdown'

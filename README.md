@@ -2,7 +2,9 @@
 
 *pa·je·ma  (pə-jĕ′mə, -jăm′ə): Pandoc + Jekyll + Markdown for great success*
 
-vim-pajema aims to make life easier for those using the above mentioned tools.
+vim-pajema aims to make life easier for those using the above mentioned tools. Basically it allows you to:
+- convert a markdown file to html and open it in firefox
+- convert a markdown file to a Jekyll suitable markdown file
 
 *NOTE:* consider this alpha version. My first vim plugin: it's ugly and messy but gets things done. It's for my own personal use, but maybe it's useful to you too.
 
@@ -51,7 +53,7 @@ And the people working on vim-markdown as well. For making markdown editing a gr
 
 # TODO
 
-- spring cleaning
+- pay technical debt
 - add configuration options
 - add information on https://github.com/jgm/pandocfilters (probably most if not all could have been done using filters)
 - fix shortcuts so that they only work with markdown files

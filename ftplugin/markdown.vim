@@ -349,7 +349,8 @@ endfunction
 function!ProcessMarkdownToHtml()
 
     "let MARKDOWN_COMMAND = 'pandoc -S -f markdown_github+footnotes -t html5 --section-divs --html-q-tags -s --toc --toc-depth=6 --number-sections -H /opt/share/doc/github-pandoc_html.css'
-    let MARKDOWN_COMMAND = 'pandoc -S -f markdown_github+footnotes+pandoc_title_block+yaml_metadata_block+tex_math_dollars -t html5 --section-divs --html-q-tags -s --toc --toc-depth=6 --number-sections -c /opt/share/doc/normalize.css -c /opt/share/doc/pandoc-github.css --latexmathml=/opt/share/doc/LaTeXMathMLPandoc.js'
+    let FILES_DIR = $HOME . '/.vim/bundle/vim-pajema/files'
+    let MARKDOWN_COMMAND = 'pandoc -S -f markdown_github+footnotes+pandoc_title_block+yaml_metadata_block+tex_math_dollars -t html5 --section-divs --html-q-tags -s --toc --toc-depth=6 --number-sections -c ' . FILES_DIR . '/normalize.css -c ' . FILES_DIR . '/pandoc-github.css --latexmathml=' . FILES_DIR . '/LaTeXMathMLPandoc.js'
     " --latexmathml=/opt/share/doc/LaTeXMathMLPandoc.js
     " --mathjax
     " use -autolink_bare_uris on the input format to fix the bold-text-to-links

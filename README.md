@@ -6,7 +6,7 @@ vim-pajema aims to make life easier for those using the above mentioned tools. B
 - convert a markdown file to html and open it in firefox
 - convert a markdown file to a Jekyll suitable markdown file
 
-*NOTE:* consider this alpha version. My first vim plugin: it's ugly and messy but gets things done. It's for my own personal use, but maybe it's useful to you too.
+**NOTE: consider this alpha version. My first vim plugin: it's ugly and messy but gets things done. It's for my own personal use, but maybe it's useful to you too.**
 
 # Features
 
@@ -21,10 +21,20 @@ Type `,j` and the sensible Pandoc markdown gets converted to a Jekyll compatible
 Bonus: references to other markdown files, such as `[Vagrant](Vagrant.md)` get converted to `[Vagrant]({% post_url 2016-01-28-vagrant %})`. Yes! It reads the YAML header and uses the date metadata.
 Note: for this to work you need to have your `.md` files in the `_drafts` folder and it will generate a `.markdown` file in the `_posts` folder.
 
+**Latex**
+
+It supports LatexMathML syntax via Pandoc.
 
 # Configuration options
 
 TODO
+
+# Installation
+
+```bash
+cd $HOME/.vim/bundle
+git clone https://github.com/alexconst/vim-pajema
+```
 
 
 # Development

@@ -4,6 +4,7 @@
 
 vim-pajema aims to make life easier for those using the above mentioned tools.
 
+*NOTE:* consider this alpha version. My first vim plugin: it's ugly and messy but gets things done. It's for my own personal use, but maybe it's useful to you too.
 
 # Features
 
@@ -24,6 +25,9 @@ Note: for this to work you need to have your `.md` files in the `_drafts` folder
 TODO
 
 
+# Development
+
+To run the tests: `make test`
 
 
 # Motivation / story time
@@ -38,7 +42,7 @@ Anyway, fast forward and this script just kept on growing and growing.
 
 The initial version of this script was based on [this awesome gist](https://gist.github.com/natesilva/960015) (maybe it even fits your bill better than this one). But as time went by all traces of it faded, except for the utf handling snippet.
 
-Also thank you John MacFarlane and contributors for Pandoc. I just love Pandoc. It really is a life saver when it comes to handling documentation.
+Also thank you John MacFarlane and other Pandoc contributors. I just love Pandoc. It really is a life saver when it comes to handling documentation.
 
 And the people working on vim-markdown as well. For making markdown editing a great experience.
 
@@ -50,6 +54,6 @@ And the people working on vim-markdown as well. For making markdown editing a gr
 - spring cleaning
 - add configuration options
 - add information on https://github.com/jgm/pandocfilters (probably most if not all could have been done using filters)
-
+- fix shortcuts so that they only work with markdown files
 
 

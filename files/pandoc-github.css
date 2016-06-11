@@ -5,7 +5,7 @@ html, body {
     padding-right:  1em;
     padding-left:  1em;
     /*max-width:  44em;*/
-    max-width:  60em;
+    max-width:  70em;
     color: black;
 }
 *:not('#mkdbuttons') {

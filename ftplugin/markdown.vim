@@ -335,14 +335,21 @@ endfunction
 "endfunction
 
 function!ProcessMarkdownToHtmlWithBoldFix()
+    " save cursor and window position
+    let l:user_view = winsaveview()
+    " escape bold text for pandoc
     silent exec "normal! mP"
     silent exec '%s/^\*\*\(.*\):\*\*\s*$/\*\*\1: \*\*/ge'
     update
     call ProcessMarkdownToHtml()
+    " restore bold text to original state
     silent exec '%s/^\*\*\(.*\): \*\*\s*$/\*\*\1:\*\*/ge'
+    " refresh
     update
     redraw!
     silent exec "normal! 'P"
+    " restore cursor and window position
+    call winrestview(l:user_view)
 endfunction
 
 

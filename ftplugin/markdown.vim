@@ -3,9 +3,10 @@
 
 function!ConvertMarkdownToJekyll()
 
-    " Pandoc command for converting the markdown file to a flavor compatible
-    " with github/jekyll.
-    let JEKYLL_MARKDOWN_COMMAND = 'pandoc -S -f markdown_github+footnotes+pandoc_title_block+yaml_metadata_block -t markdown_github+footnotes+fenced_code_blocks+backtick_code_blocks-hard_line_breaks+yaml_metadata_block  --atx-headers -s '
+    " Pandoc command for converting the markdown file to a flavor compatible with github/jekyll.
+"   let JEKYLL_MARKDOWN_COMMAND = 'pandoc -S -f markdown_github+footnotes+pandoc_title_block+yaml_metadata_block -t markdown_github+footnotes+fenced_code_blocks+backtick_code_blocks-hard_line_breaks+yaml_metadata_block  --atx-headers -s '
+    let JEKYLL_MARKDOWN_COMMAND = 'pandoc -f markdown_github+footnotes+pandoc_title_block+yaml_metadata_block+smart -t markdown_github+footnotes+fenced_code_blocks+backtick_code_blocks-hard_line_breaks+yaml_metadata_block  --atx-headers -s '
+    " NOTE: if the above command no longer produces the desired effect (because of pandoc version change) look into the other pandoc command (for converting .md to .html) for some possible options
 
     " search for a yaml frontmatter date tag
     let matched = ''
@@ -355,11 +356,10 @@ endfunction
 
 function!ProcessMarkdownToHtml()
 
-    "let MARKDOWN_COMMAND = 'pandoc -S -f markdown_github+footnotes -t html5 --section-divs --html-q-tags -s --toc --toc-depth=6 --number-sections -H /opt/share/doc/github-pandoc_html.css'
     let FILES_DIR = $HOME . '/.vim/bundle/vim-pajema/files'
-    let MARKDOWN_COMMAND = 'pandoc -S -f markdown_github+footnotes+pandoc_title_block+yaml_metadata_block+tex_math_dollars -t html5 --section-divs --html-q-tags -s --toc --toc-depth=6 --number-sections -c ' . FILES_DIR . '/normalize.css -c ' . FILES_DIR . '/pandoc-github.css --latexmathml=' . FILES_DIR . '/LaTeXMathMLPandoc.js'
-    " --latexmathml=/opt/share/doc/LaTeXMathMLPandoc.js
-    " --mathjax
+    " NOTE: math rendering is working with both mathjax and mathml (which doesn't even need the include of the LaTeXMathMLPandoc.js file), but mathml looks nicer
+    "let MARKDOWN_COMMAND = 'pandoc -f markdown_github+footnotes+pandoc_title_block+yaml_metadata_block+tex_math_dollars+smart+hard_line_breaks+tex_math_single_backslash -t html5 --section-divs --html-q-tags -s --toc --toc-depth=6 --number-sections -c ' . FILES_DIR . '/normalize.css -c ' . FILES_DIR . '/pandoc-github.css --mathjax=' . FILES_DIR . '/tex-mml-chtml.js'
+    let MARKDOWN_COMMAND = 'pandoc -f markdown_github+footnotes+pandoc_title_block+yaml_metadata_block+tex_math_dollars+smart+hard_line_breaks+tex_math_single_backslash -t html5 --section-divs --html-q-tags -s --toc --toc-depth=6 --number-sections -c ' . FILES_DIR . '/normalize.css -c ' . FILES_DIR . '/pandoc-github.css --mathml -c ' . FILES_DIR . '/LaTeXMathMLPandoc.js'
     " use -autolink_bare_uris on the input format to fix the bold-text-to-links
 
 
@@ -380,7 +380,8 @@ function!ProcessMarkdownToHtml()
     endif
 
 
-    let md_command = '!' . MARKDOWN_COMMAND . ' "' . expand('%:p') . '" -o "' . output_name . '"'
+    "let md_command = '!' . MARKDOWN_COMMAND . ' "' . expand('%:p') . '" -o "' . output_name . '"'
+    let md_command = '!' . MARKDOWN_COMMAND . ' --metadata title="' . expand('%:t') . '" "' . expand('%:p') . '" -o "' . output_name . '"'
     silent exec md_command
 
 

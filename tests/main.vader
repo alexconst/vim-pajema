@@ -14,7 +14,7 @@ Before:
   let g:log_file = g:test_dir . 'vader.log'
   let g:vim_pajema_browser = '/usr/bin/chromium --password-store=basic'
   let g:test_browser_tabs_check = "strings $HOME/.config/chromium/Default/Sessions/Session_* | grep -E '^file:///' | sort -u"
-  let g:browser_close_cmd = '/usr/bin/wmctrl -c "input_file.md"'
+  let g:browser_close_cmd = "xdotool windowactivate --sync $(xwininfo -root -tree | grep input_file.md | awk '{print $1;}') key 'control+w'"
   :silent! 4,400bwipeout
 
 

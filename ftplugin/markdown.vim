@@ -5,7 +5,8 @@ function!ConvertMarkdownToJekyll()
 
     " Pandoc command for converting the markdown file to a flavor compatible with github/jekyll.
 "   let JEKYLL_MARKDOWN_COMMAND = 'pandoc -S -f markdown_github+footnotes+pandoc_title_block+yaml_metadata_block -t markdown_github+footnotes+fenced_code_blocks+backtick_code_blocks-hard_line_breaks+yaml_metadata_block  --atx-headers -s '
-    let JEKYLL_MARKDOWN_COMMAND = 'pandoc -f markdown_github+footnotes+pandoc_title_block+yaml_metadata_block+smart -t markdown_github+footnotes+fenced_code_blocks+backtick_code_blocks-hard_line_breaks+yaml_metadata_block  --atx-headers -s '
+"    let JEKYLL_MARKDOWN_COMMAND = 'pandoc -f markdown_github+footnotes+pandoc_title_block+yaml_metadata_block+smart -t markdown_github+footnotes+fenced_code_blocks+backtick_code_blocks+yaml_metadata_block  --atx-headers -s '
+    let JEKYLL_MARKDOWN_COMMAND = 'pandoc -f markdown_github+footnotes+pandoc_title_block+yaml_metadata_block+smart+hard_line_breaks -t markdown_github+footnotes+fenced_code_blocks+backtick_code_blocks+yaml_metadata_block --atx-headers -s '
     " NOTE: if the above command no longer produces the desired effect (because of pandoc version change) look into the other pandoc command (for converting .md to .html) for some possible options
 
     " search for a yaml frontmatter date tag
@@ -105,7 +106,7 @@ endfunction
 
 
 function!JekyllFilePostProc()
-    let log_file = 'log.txt'
+    "let log_file = 'vim_pajema.log'
     "call MyLoggerInit(log_file)
     " jekyll compatibility
     if expand('%:e') != 'markdown'
@@ -120,8 +121,11 @@ function!JekyllFilePostProc()
     let orgfoldexpr=&foldexpr
     setlocal foldexpr=0
 
+    "exec 'w /tmp/vim_pajema_window_dump.txt' " this debug line helped confirm that we have the data (ie vim-markdown toc window doesn't affect us)
+    "execute '!xclock'
 
     " convert .md links to proper jekyll links that use date in URL
+    " example: `[Vagrant](vagrant.md)` in packer.md to `[Vagrant]({% post_url 2016-01-28-vagrant %})` in 2016-01-11-packer.markdown
     let b:user_view = winsaveview()
     normal gg
     let expr_big = '\[[^\]]*\]([^)]*)' " this expr finds valid links, but is incomplete
@@ -182,10 +186,13 @@ function!JekyllFilePostProc()
 
     " implement workaround to jekyll 3 bug on naked links which basically means
     " converting this:  <https://github.com/alexconst>
+    " and:              <a href=https://github.com/github/pages-gem/issues/231 class=uri>https://github.com/github/pages-gem/issues/231</a>
     " into:             [https://github.com/alexconst](https://github.com/alexconst)
     if g:vim_pajemas_kramdown == 1
         normal gg
-        let expr_big = '\s*<[a-z]\+://[^>]\+>\(  \)\?$' " this expr finds naked links
+        "let expr_big = '\s*<[a-z]\+://[^>]\+>\(  \)\?$' " this expr finds naked links
+        "let expr_big = '\s*<\(a href=\)\?[a-z]\+://[^>]\+\(class=uri>[^>]\+</a\)\?>' " this expr finds urls within <...> including <a>...</a>
+        let expr_big = '<a href=.\{-}</a>' " this expr matches urls using format <a>...</a>
         let flags = 'W'
         let b:lnum = 1
         while b:lnum > 0
@@ -193,7 +200,8 @@ function!JekyllFilePostProc()
             "echom 'found link at line ' . string(b:lnum)
             "call MyLogger(log_file, b:lnum, getline(b:lnum))
             let b:lineraw = getline(b:lnum)
-            let b:newline = substitute(b:lineraw,   '\(.*\)<\(.*\)>\(.*\)$',   '\1[\2](\2)\3', 'g')
+            "let b:newline = substitute(b:lineraw,   '\(.*\)<\(.*\)>\(.*\)$',   '\1[\2](\2)\3', 'g')
+            let b:newline = substitute(b:lineraw,   '\(.*\)<a href=\(.*\) class.*</a>\(.*\)$',   '\1[\2](\2)\3', 'g')
             call setline(b:lnum, b:newline)
         endwhile
     endif
@@ -224,6 +232,7 @@ function!JekyllFilePostProc()
         call setline(b:lnum, line)
         let b:lnum = b:lnum + 1
     endwhile
+
     " read yaml frontmatter
     let yaml_status = 0
     let b:lnum = 0
@@ -256,6 +265,7 @@ function!JekyllFilePostProc()
         endif
     endwhile
     "echom string(yaml)
+
     " fix pandoc yaml frontmatter element sorting
     let order = ['layout', 'title', 'description', 'date', 'categories', 'tags']
     let b:lnum = 2
@@ -292,7 +302,9 @@ function!JekyllFilePostProc()
         call setline(b:lnum, newline)
         let b:lnum = b:lnum + 1
     endwhile
-    if getline(b:lnum) == '...'
+
+    " fix frontmatter if required and add toc macro if enabled
+    if getline(b:lnum) == '...' || getline(b:lnum) == '---'
         call setline(b:lnum, '---')
         " append toc tag if kramdown is being used
         if g:vim_pajemas_kramdown_toc == 1
@@ -401,7 +413,7 @@ endfunction
 
 function!PreviewMarkdownInBrowser()
 
-    let BROWSER_COMMAND = '/opt/bin/firefox'
+    let g:vim_pajema_browser = get(g:, "vim_pajema_browser", '/usr/bin/firefox')
 
 
     " jekyll compatibility
@@ -413,7 +425,7 @@ function!PreviewMarkdownInBrowser()
     let output_name = expand('%:r') . '.html'
     "call ProcessMarkdownToHtml()
 
-    silent exec '!' . BROWSER_COMMAND . ' "' . output_name . '"'
+    silent exec '!' . g:vim_pajema_browser . ' "' . output_name . '" &'
 
     "exec input('Press ENTER to continue...')
     "echo

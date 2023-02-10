@@ -29,7 +29,10 @@ It supports LatexMathML syntax via Pandoc.
 
 # Configuration options
 
-TODO
+```vim
+# override the default browser (firefox) used to preview the generated html file
+let g:vim_pajema_browser = '/usr/bin/chromium'
+```
 
 # Installation
 
@@ -42,6 +45,13 @@ git clone https://github.com/alexconst/vim-pajema
 # Development
 
 To run the tests: `make test`
+
+To enable logging take a look at these in the code
+```vim
+let log_file = 'vim_pajema.log'
+call MyLoggerInit(log_file)
+call MyLogger(log_file, b:lnum, getline(b:lnum)) " (log file, line num, msg)
+```
 
 
 # Motivation / story time

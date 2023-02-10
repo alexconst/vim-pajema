@@ -11,10 +11,17 @@ Before:
   let g:html_filename = g:test_dir . '_drafts/input_file.html'
   let g:md_filename_bro = g:test_dir . '_drafts/input_file_bro.md'
   let g:jekyll_filename = g:test_dir . '_posts/2016-01-11-input-file.markdown'
-  let g:log_file = g:test_dir . 'vader.txt'
+  let g:log_file = g:test_dir . 'vader.log'
+  let g:vim_pajema_browser = '/usr/bin/chromium --password-store=basic'
+  let g:test_browser_tabs_check = "strings $HOME/.config/chromium/Default/Sessions/Session_* | grep -E '^file:///' | sort -u"
+  let g:browser_close_cmd = '/usr/bin/wmctrl -c "input_file.md"'
   :silent! 4,400bwipeout
 
 
+# if things go south, when troubleshooting these may be helpful
+#  silent execute '!rm -f ' . g:jekyll_filename
+#  execute ':bd'
+#  execute ':w! ' . '/tmp/vim-pajema/vader_dump.txt'
 
 
 ##########################################
@@ -55,13 +62,19 @@ Execute (prepare test environment):
 
 
 
+
+
 ##########################################
 # check html file is created
 ##########################################
 Given markdown;
-# chap
+# chap A
 
 hello
+
+## chap B
+
+bye
 
 Execute (check html file is created):
 # vim-pajema needs a real file with known whereabouts to work,
@@ -73,12 +86,17 @@ Execute (check html file is created):
 # open generated html and verify it
   execute ':edit ' . g:html_filename
   AssertEqual getline('1'), '<!DOCTYPE html>'
-# navigate to heading
+# navigate and skip heading
   /<h1\>
-  AssertEqual getline('.'), '<h1><span class="header-section-number">1</span> chap</h1>'
+# navigate to chapter
+  /<h1\>
+  AssertEqual getline('.'), '<h1 data-number="1"><span class="header-section-number">1</span> chap A</h1>'
 # navigate to first (and only) paragraph
   /<p\>
   AssertEqual getline('.'), '<p>hello</p>'
+
+
+
 
 
 
@@ -101,15 +119,21 @@ Execute (check browser opens generated html file):
 # open html in firefox
   normal ,p
 # give it some time to refresh the sessions file
-  silent execute '!sleep 5s'
-# execute command that queries firefox open tabs
-  let cmd = 'export firefox_session="$( echo $HOME/.mozilla/firefox/*.default )/sessionstore-backups/recovery.js"'
-  let cmd = cmd . "; cat \"$firefox_session\" | jq '.\"windows\"[][\"tabs\"][][\"entries\"][][\"url\"]' | grep "
-  let cmd = cmd . g:html_filename[:-1] . ' > ' . g:log_file
+  silent execute '!sleep 3s'
+# execute command that queries the browser open tabs
+  let cmd = g:test_browser_tabs_check . " | grep " . g:html_filename[:-1] . ' > ' . g:log_file
   silent execute '!' . cmd
-# open file and assert
-  execute ':tabe ' . g:log_file
-  AssertEqual getline('1'), '"file:///tmp/vim-pajema/_drafts/input_file.html"'
+# close open buffer, without it vim/vader get crazy even though and independently of the use of :edit or :tabe
+  execute ':bd'
+# open file and assert (NOTE: the output may differ between firefox and chromium, namely the use of double quotes in the output)
+  execute ':edit ' . g:log_file
+  AssertEqual getline('1'), 'file:///tmp/vim-pajema/_drafts/input_file.html'
+# close browser
+  silent execute '!' . g:browser_close_cmd
+
+
+
+
 
 
 
@@ -155,6 +179,9 @@ Execute (check conversion from pandoc to jekyll):
 
 
 
+
+
+
 ##########################################
 # check conversion from pandoc to jekyll using Kramdown
 ##########################################
@@ -176,6 +203,9 @@ Naked links (test for workaround on jekyll 3 bugs):
 
   http://debian.org
 
+How about this one [this is another](https://foo.com)
+And can it <https://work.com> with two <http://urls.com>?
+
 
 Execute (check conversion from pandoc to jekyll 3 with kramdown):
 # enable kramdown and toc include line
@@ -183,6 +213,7 @@ Execute (check conversion from pandoc to jekyll 3 with kramdown):
   let g:vim_pajemas_kramdown_toc=1
 # save the given markdown file
   execute ':w! ' . g:md_filename
+  execute ':bd'
 # open md file
   execute ':edit ' . g:md_filename
 # convert to jekyll
@@ -194,13 +225,14 @@ Execute (check conversion from pandoc to jekyll 3 with kramdown):
   AssertEqual getline('.'), '{% include toc.md %}'
 # check naked link with newline
   /231
-  AssertEqual getline('.'), '[https://github.com/github/pages-gem/issues/231](https://github.com/github/pages-gem/issues/231)  '
+  AssertEqual getline('.'), '["https://github.com/github/pages-gem/issues/231"]("https://github.com/github/pages-gem/issues/231")  '
 # check naked link without newline
   /4627
-  AssertEqual getline('.'), '[https://github.com/jekyll/jekyll/issues/4627](https://github.com/jekyll/jekyll/issues/4627)'
+  AssertEqual getline('.'), '["https://github.com/jekyll/jekyll/issues/4627"]("https://github.com/jekyll/jekyll/issues/4627")'
 # check naked link without braces and with leading whitespace
   /debian
-  AssertEqual getline('.'), '[http://debian.org](http://debian.org)'
+  AssertEqual getline('.'), '["http://debian.org"]("http://debian.org")'
+
 
 
 
